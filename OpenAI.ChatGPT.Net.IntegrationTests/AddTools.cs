@@ -1,6 +1,6 @@
-﻿using OpenAI.ChatGPT.Net.IntegrtionTests.Tools;
+﻿using OpenAI.ChatGPT.Net.IntegrationTests.Tools;
 
-namespace OpenAI.ChatGPT.Net.IntegrtionTests
+namespace OpenAI.ChatGPT.Net.IntegrationTests
 {
     internal class AddTools
     {

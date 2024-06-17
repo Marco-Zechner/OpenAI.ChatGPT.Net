@@ -1,4 +1,4 @@
-﻿namespace OpenAI.ChatGPT.Net.IntegrtionTests.Tools
+﻿namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
 {
     ///// <summary>
     ///// This class has the Attribute [<see cref="GPTAttributeFiltered"/>] 

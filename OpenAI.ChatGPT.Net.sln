@@ -5,7 +5,7 @@ VisualStudioVersion = 17.8.34525.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenAI.ChatGPT.Net", "OpenAI.ChatGPT.Net\OpenAI.ChatGPT.Net.csproj", "{34E79BF6-454F-4D03-AD4C-5760D5709469}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenAI.ChatGPT.Net.IntegrationTests", "OpenAI.ChatGPT.Net.IntegrtionTests\OpenAI.ChatGPT.Net.IntegrationTests.csproj", "{7FF61E87-A9D9-4778-A844-701BE60ADD2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenAI.ChatGPT.Net.IntegrationTests", "OpenAI.ChatGPT.Net.IntegrationTests\OpenAI.ChatGPT.Net.IntegrationTests.csproj", "{7FF61E87-A9D9-4778-A844-701BE60ADD2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

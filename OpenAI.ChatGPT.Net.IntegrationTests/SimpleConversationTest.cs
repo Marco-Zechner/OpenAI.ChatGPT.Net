@@ -1,6 +1,6 @@
 ﻿using OpenAI.ChatGPT.Net;
 
-namespace OpenAI.ChatGPT.Net.IntegrtionTests
+namespace OpenAI.ChatGPT.Net.IntegrationTests
 {
     internal class SimpleConversationTest
     {
