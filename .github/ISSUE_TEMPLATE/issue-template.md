@@ -31,9 +31,19 @@ To work on this issue, first create a new branch from the main branch.
 
 3. Create a new branch named after the issue:
    ```bash
-   git checkout -b issue-<issue-number>-<short-description>
+   git checkout -b <issue-number>-<short-description>
    ```
    Replace `<issue-number>` with the GitHub issue number and `<short-description>` with a brief description of the issue.
+
+### 1. (ALT) Create a New Branch via GitHub UI
+
+1. On the right of this issue create a new Branch
+
+2. Copy Commands from Infobox, should look like this
+   ```bash
+   git fetch origin
+   git checkout <issue-number>-<short-description>
+   ```
 
 ### 2. Work on the Issue
 1. Make changes to your local repository.
@@ -49,7 +59,7 @@ To work on this issue, first create a new branch from the main branch.
 
 4. Push the changes to the remote repository:
    ```bash
-   git push origin issue-<issue-number>-<short-description>
+   git push origin <issue-number>-<short-description>
    ```
 
 ### 3. Create a Pull Request
@@ -64,8 +74,8 @@ To work on this issue, first create a new branch from the main branch.
 2. Once approved, merge the pull request into the main branch.
 3. After merging, you can delete the branch on Github, local and then verify the deletion:
    ```bash
-   git push origin --delete issue-<issue-number>-<short-description>
-   git branch -d issue-<issue-number>-<short-description>
+   git push origin --delete <issue-number>-<short-description>
+   git branch -d <issue-number>-<short-description>
    git branch
    ```
 4. Pull the latest changes to update your local repository:
