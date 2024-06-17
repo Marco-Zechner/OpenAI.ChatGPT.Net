@@ -1,4 +1,4 @@
-﻿using OpenAI.ChatGPT.Net.IntegrtionTests;
+﻿using OpenAI.ChatGPT.Net.IntegrationTests;
 
 SingleCompletionTest.Run();
 

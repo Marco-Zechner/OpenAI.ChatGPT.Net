@@ -1,4 +1,4 @@
-﻿namespace OpenAI.ChatGPT.Net.IntegrtionTests.Tools
+﻿namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
 {
     /// <summary>
     /// Class containing tools must be public

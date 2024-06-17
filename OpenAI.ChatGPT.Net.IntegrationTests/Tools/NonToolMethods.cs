@@ -1,4 +1,4 @@
-﻿namespace OpenAI.ChatGPT.Net.IntegrtionTests.Tools
+﻿namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
 {
     ///// <summary>
     ///// Methods of a Class locked with [<see cref="GPTLockClass"/>] can't be used by GPT even if you attempt to add them.
