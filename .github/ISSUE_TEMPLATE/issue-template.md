@@ -69,19 +69,19 @@ To work on this issue, first create a new branch from the main branch.
 4. Provide a descriptive title and include `Fixes #<issue-number>` in the description to link the issue.
 5. Click **Create pull request**.
 
-### 4. Merge the Pull Request
+### 4. Merge the Pull Request (DON'T SKIP THIS!!!)
 1. Wait for review and approval.
 2. Once approved, merge the pull request into the main branch.
-3. After merging, you can delete the branch on Github, local and then verify the deletion:
+3. Pull the latest changes to update your local repository:
+   ```bash
+   git checkout main
+   git pull origin main
+   ```
+4. After merging, you can delete the branch on Github, local and then verify the deletion:
    ```bash
    git push origin --delete <issue-number>-<short-description>
    git branch -d <issue-number>-<short-description>
    git branch
-   ```
-4. Pull the latest changes to update your local repository:
-   ```bash
-   git checkout main
-   git pull origin main
    ```
 
 ### Notes
