@@ -1,25 +1,29 @@
 ﻿using OpenAI.ChatGPT.Net;
+using OpenAI.ChatGPT.Net.DataModels;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests
 {
     internal class SingleCompletionTest
     {
-        public static async void Run()
+        public static async Task Run()
         {
-            //GPTModel model = new GPTModel("gpt-4o", "key");
+            GPTModel model = new("gpt-4o", APIKey.KEY)
+            {
+                MaxTokens = 500
+            };
 
-            //GPTMessage initialMessage = new GPTMessage(GPTRole.User, "How are you?");
+            ChatMessage initialMessage = new(ChatRole.User, "How are you?");
 
-            //GPTResponse response = await model.Complete(initialMessage);
+            ChatResponse response = await model.Complete(initialMessage);
 
-            //if (response is GPTError error)
-            //{
-            //    Console.WriteLine($"Error: {error.Message}");
-            //    return;
-            //}
+            if (response.Error != null)
+            {
+                Console.WriteLine($"Error: {response.Error.Message}");
+                return;
+            }
 
-            //message = response as GPTMessage;
-            //Console.WriteLine(message.Role + ": " + message.Message);
+            var message = (ChatMessage)response;
+            Console.WriteLine(message.Role + ": " + message.Content);
         }
     }
 }
