@@ -12,6 +12,9 @@ namespace OpenAI.ChatGPT.Net.DataModels
                 [property: JsonProperty("messages")] List<ChatMessage> Messages,
                 [property: JsonProperty("model")] string Model,
                 [property: JsonProperty("frequency_penalty")] double? FrequencyPenalty = null,
+                [property: JsonProperty("logit_bias")] Dictionary<int, int>? LogitBias = null,
+                [property: JsonProperty("logprobs")] bool? Logprobs = null,
+                [property: JsonProperty("top_logprobs")] int? TopLogprobs = null,
                 [property: JsonProperty("max_tokens")] long? MaxTokens = null,
                 [property: JsonProperty("n")] long? N = null,
                 [property: JsonProperty("presence_penalty")] double? PresencePenalty = null,
@@ -34,33 +37,4 @@ namespace OpenAI.ChatGPT.Net.DataModels
             return HashCode.Combine(one, two);
         }
     }
-
-    public record StreamOptions(
-        [property: JsonProperty("include_usage")] bool IncludeUsage
-    );
-
-    public record ToolChoice(
-        [property: JsonProperty("tool_choice")] string? Choice, 
-        [property: JsonProperty("function", DefaultValueHandling = DefaultValueHandling.Ignore)] SimpleTool? Tool
-    )
-    {
-        public ToolChoice() : this(null, null) { }
-
-        public ToolChoice(string choice) : this(choice, null)
-        {
-        }
-
-        public ToolChoice(SimpleTool tool) : this(null, tool)
-        {
-        }
-    }
-
-    public record SimpleTool(
-        [property: JsonProperty("type")] string Type,
-         [property: JsonProperty("function")] SimpleToolFunction Function
-    );
-
-    public record SimpleToolFunction(
-        [property: JsonProperty("name")] string Name
-    );
 }
