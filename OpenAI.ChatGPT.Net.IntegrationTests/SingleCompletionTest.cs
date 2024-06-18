@@ -1,5 +1,4 @@
-﻿using OpenAI.ChatGPT.Net;
-using OpenAI.ChatGPT.Net.DataModels;
+﻿using OpenAI.ChatGPT.Net.DataModels;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests
 {
@@ -22,8 +21,18 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests
                 return;
             }
 
-            var message = (ChatMessage)response;
-            Console.WriteLine(message.Role + ": " + message.Content);
+            Console.WriteLine((ChatMessage)response);
+        }
+
+        public static async Task TotalMin()
+        {
+            string? input = Console.ReadLine();
+
+            GPTModel model = new("gpt-4o", APIKey.KEY);
+            ChatMessage initialMessage = new(ChatRole.User, input);
+            ChatResponse response = await model.Complete(initialMessage);
+      
+            Console.WriteLine((ChatMessage)response);
         }
     }
 }

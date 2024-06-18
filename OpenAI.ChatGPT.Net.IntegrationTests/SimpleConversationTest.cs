@@ -1,34 +1,37 @@
-﻿using OpenAI.ChatGPT.Net;
+﻿using OpenAI.ChatGPT.Net.DataModels;
+using OpenAI.ChatGPT.Net.Exeptions;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests
 {
     internal class SimpleConversationTest
     {
-        public static async void Run()
+        public static async Task Run()
         {
-            //GPTModel model = new GPTModel("gpt-4o", "key");
+            GPTModel model = new("gpt-4o", APIKey.KEY);
 
-            //GPTMessage initialMessage = new GPTMessage(GPTRole.User, Console.ReadLine());
-            //List<GPTMessage> messageHistory = [initialMessage];
+            Console.Write($"{ChatRole.User}: ");
+            ChatMessage initialMessage = new(ChatRole.User, Console.ReadLine());
+            List<ChatMessage> messageHistory = [initialMessage];
 
-            //do
-            //{
-            //    GPTResponse response = await model.Complete(messageHistory);
+            try
+            {
+                while (true)
+                {
+                    ChatResponse response = await model.Complete(messageHistory);
 
-            //    if (response is GPTError error)
-            //    {
-            //        Console.WriteLine($"Error: {error.Message}");
-            //        break; // or try to generate it again.
-            //    }
+                    ChatMessage message = (ChatMessage)response;
+                    Console.WriteLine(message);
+                    messageHistory.Add(message);
 
-            //    GPTMessage message = (GPTMessage)response; // or: GPTMessage messag = response as GPTMessage
-            //    Console.WriteLine(message.Role + ": " + message.Message);
-            //    messageHistory.Add(message);
-
-            //    GPTMessage nextMessage = new GPTMessage(GPTRole.User, Console.ReadLine());
-            //    messageHistory.Add(nextMessage);
-            //}
-            //while (true);
+                    Console.Write($"{ChatRole.User}: ");
+                    ChatMessage nextMessage = new(ChatRole.User, Console.ReadLine());
+                    messageHistory.Add(nextMessage);
+                }
+            }
+            catch (GPTAPIResponseException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }

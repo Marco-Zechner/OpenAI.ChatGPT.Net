@@ -1,7 +1,11 @@
 ﻿using OpenAI.ChatGPT.Net.IntegrationTests;
 
-await SingleCompletionTest.Run();
+//await SingleCompletionTest.TotalMin();
 
-//SimpleConversationTest.Run();
+//await SingleCompletionTest.Run();
+
+//await SimpleConversationTest.Run();
+
+await ConversationWithCustomHandlers.Run();
 
 //AddTools.Run();

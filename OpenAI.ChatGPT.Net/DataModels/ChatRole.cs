@@ -9,7 +9,6 @@ namespace OpenAI.ChatGPT.Net.DataModels
         System,
         User,
         Assistant,
-        Tool,
-        Function
+        Tool
     }
 }
