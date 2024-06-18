@@ -29,6 +29,8 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests
             {
                 PayloadHandler = PrintPayloadHandler,
                 ResponseHandler = PrintResponseHandler,
+                Logprobs = true,
+                TopLogprobs = 2
             };
 
             /*======================================================================\\

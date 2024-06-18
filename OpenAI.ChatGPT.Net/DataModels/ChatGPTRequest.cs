@@ -27,6 +27,8 @@ namespace OpenAI.ChatGPT.Net.DataModels
                 [property: JsonProperty("tool_choice")] ToolChoice? ToolChoice = null,
                 [property: JsonProperty("parallel_tool_calls")] bool? ParallelToolCalls = null,
                 [property: JsonProperty("user")] string? User = null
+            // service_tier. only mentioned here: // scale_tier? Can't find info about it: https://platform.openai.com/docs/api-reference/chat/object
+            // Can't find more info
             )
     {
         public override int GetHashCode()
