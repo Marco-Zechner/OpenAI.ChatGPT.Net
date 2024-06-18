@@ -43,13 +43,13 @@ OpenAI.ChatGPT.Net is a C# library built on .NET 8.0 that provides an easy-to-us
 Install the library via NuGet:
 
 ```bash
-Install-Package OpenAI.ChatGPT.Net
+NOT READY!!! Install-Package OpenAI.ChatGPT.Net
 ```
 
 Or using .NET CLI:
 
 ```bash
-dotnet add package OpenAI.ChatGPT.Net
+NOT READY!!! dotnet add package OpenAI.ChatGPT.Net
 ```
 
 ### Basic Usage
@@ -57,29 +57,84 @@ dotnet add package OpenAI.ChatGPT.Net
 Below is an example of using OpenAI.ChatGPT.Net without any tools:
 
 ```csharp
-using OpenAI.ChatGPT.Net;
+using OpenAI.ChatGPT.Net.DataModels;
 
-var model = new GPTModel("gpt-4o", "YOUR-API-KEY");
+string? input = Console.ReadLine();
 
-List<GPTMessage> history = new() 
-{ 
-    new GPTMessage(GPTRole.System, "What is the capital of France?") 
+GPTModel model = new("gpt-4o", APIKey.KEY);
+ChatMessage initialMessage = new(ChatRole.User, input);
+ChatResponse response = await model.Complete(initialMessage);
+      
+Console.WriteLine((ChatMessage)response);
+```
+
+You can also specify all the other parameters on the model. For more information on the parameters see the [OpenAI Docu](https://platform.openai.com/docs/api-reference/chat/create)
+```csharp
+GPTModel model = new("gpt-4o", APIKey.KEY)
+{
+   MaxTokens = 500
 };
+```
 
-GPTResponse response = await model.GenerateCompletion(history);
+If the API responds with an Error you can either handle it directly or catch the error when trying to parse the response to a message
+```csharp
+GPTModel model = new("invalidModel", APIKey.KEY);
+ChatMessage initialMessage = new(ChatRole.User, "This will produce an error because \"invalidModel\" is not a valid model");
+ChatResponse response = await model.Complete(initialMessage);
 
-if (response is GPTMessage message)
+if (response.Error != null)
 {
-    history.Add(message);
-    Console.WriteLine(message.Content);
+    Console.WriteLine($"Error: {response.Error.Message}");
+    return;
 }
-else if (response is GPTError error)
-{
-    Console.WriteLine(error.Message);
+
+Console.WriteLine((ChatMessage)response);
+```
+```csharp
+GPTModel model = new("invalidModel", APIKey.KEY);
+ChatMessage initialMessage = new(ChatRole.User, "This will produce an error because \"invalidModel\" is not a valid model");
+ChatResponse response = await model.Complete(initialMessage);
+
+try {
+  Console.WriteLine((ChatMessage)response);
+} catch (GPTAPIResponseException ex) {
+  Console.WriteLine(ex.Message);
 }
 ```
 
-## Tools
+You also can set 2 JsonHandlers
+- payload: the JSON that gets sent to the API
+- response: the JSON that you receive back from the API  
+
+Here is an example where we print it out to the console to inspect (REALLY USEFUL if you get an error back from the API)
+But you can also overwrite it to add some check/filter or something in between.
+```csharp
+static string PrintPayloadHandler(string payload)
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Payload:");
+    Console.WriteLine(payload);
+    Console.ResetColor();
+    return payload;
+}
+
+static string PrintResponseHandler(string response)
+{
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine("Response:");
+    Console.WriteLine(response);
+    Console.ResetColor();
+    return response;
+}
+
+GPTModel model = new("gpt-4o", APIKey.KEY)
+{
+   PayloadHandler = PrintPayloadHandler,
+   ResponseHandler = PrintResponseHandler
+};
+```
+
+## Tools (CONCEPT PHASE, NOT YET IMPLEMENTED)
 
 OpenAI.ChatGPT.Net allows for dynamic tool registration using reflection, making it easy to add, remove, or manage tools. Tools are static methods that can be invoked by the GPT model based on user input or system needs.
 
