@@ -136,66 +136,57 @@ GPTModel model = new("gpt-4o", APIKey.KEY)
 
 ## Tools (CONCEPT PHASE, NOT YET IMPLEMENTED)
 
-OpenAI.ChatGPT.Net allows for dynamic tool registration using reflection, making it easy to add, remove, or manage tools. Tools are static methods that can be invoked by the GPT model based on user input or system needs.
+OpenAI.ChatGPT.Net allows for dynamic tool registration, making it easy to add, remove, and manage tools. 
+Tools are public methods that can be invoked by the GPT model based on user input or system needs.
 
 ### Registering Tools
 
-You can register individual tools or entire classes of tools. Here’s how to add a specific tool:
+You can register individual tools or entire classes of tools. 
 
+Here’s how to add a specific public static and instance method as a tool:
 ```csharp
-var model = new GPTModelBuilder("gpt-4o", "YOUR-API-KEY")
-    .AddTool(MyTools.GetTime)
-    .Build();
+var model = new GPTModel("gpt-4o", "YOUR-API-KEY") // Fluid API, allows chaining
+    .AddTool<MyTools>(_ => MyTools.GetTime) // Adding static Tools
+    .AddTool<InstanceToolCar>(tc => tc.TurnOn) // Adding Instance Tools
 ```
 
+Adding a specific Method if it has multiple Overloads
+```csharp
+model.AddTool<InstanceToolCar>(tc => new Func<int, int>(tc.FuelUp)) // with multiple Overloads
+    .AddTool<InstanceToolCar>(tc => new Func<double, int>(tc.FuelUp)) // with multiple Overloads
+```
 ### Adding Tools from Classes
 
 To add all tools from a class:
 
 ```csharp
-model.AddToolClass<MyToolClass>();
+model.AddToolClass<MyToolClass>() // Adding all Tools from a Class
 ```
 
 To exclude specific methods from being added:
 
 ```csharp
-model.AddToolClass<MyToolClass>()
-     .RemoveTool(MyToolClass.RemovedMethod);
-```
-
-To add only methods with specific attributes from a class:
-
-```csharp
-model.AddToolClass<MyToolClass2>(onlyAttributes: true);
+model.AddToolClass<MyToolClass>() // Adding all Tools from a Class
+    .RemoveTool<MyToolClass>(_ => MyToolClass.RemovedTool);// And filtering some out again.
 ```
 
 ### Custom Attributes for Tools
 
 Use custom attributes to provide metadata or control the inclusion of tools. Here are the attributes you can use:
 
-- **`[GPTTool]`**: Marks a method as a tool with optional description.
-- **`[GPTHideMethod]`**: Marks a method to be excluded unless specifically added.
+- **`[GPTTool]`**: Adds a description to the Method for GPT that provides context or details about the tool's functionality.
+- **`[GPTParameters]`**: Adds a description for the parameters, providing details about each parameter expected by the method.
+- **`[InstanceDescription]`**: Adds a description to a class that will be available to GPT as an Instance, that provides details or context about the class.
+- **`[PropertyDescription]`**: Adds a description to a property of a class that will be available to GPT as an Instance, giving additional information or context about the property.
+- **`[GPTLockMethod]`**: Marks a Method as specifically NOT available for GPT, if you need that for any reason
+- **`[GPTLockClassAttribute]`**: Marks all Methods of a Class as specifically NOT available for GPT, if you need that for any reason
+- **`[GPTAttributeFiltered]`**: Marks a class for attribute-based filtering, indicating that if the Class is added as a ToolClass then only methods with Attributes (GPTTool, GPTParameters) will be added as Tools.
 
 Example of tool class with attributes:
 
 ```csharp
-public static class MyTools
-{
-    [GPTTool("Returns the current time")]
-    public static string GetTime() => DateTime.Now.ToString();
-
-    [GPTHideMethod]
-    public static string HiddenTool() => "This tool is hidden by default";
-}
-
-public static class MyToolClass2
-{
-    [GPTTool("This is Tool1")]
-    public static string Tool1() => "Tool1 executed";
-
-    [GPTTool("This is Tool2 with parameters")]
-    public static string Tool2(int number) => $"Tool2 executed with number {number}";
-}
+Will add later. Look at "OpenAI.ChatGPT.Net.IntegrationTests/Tools/"
+Different examples are in the different files
 ```
 
 ## Contributing
