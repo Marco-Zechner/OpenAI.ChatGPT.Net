@@ -1,12 +1,14 @@
-﻿namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
+﻿using OpenAI.ChatGPT.Net.Tools;
+
+namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
 {
-    ///// <summary>
-    ///// This class has the Attribute [<see cref="GPTAttributeFiltered"/>] 
-    ///// which will filter out all methods that do not have the [<see cref="GPTTool"/>] 
-    ///// or [<see cref="GPTParemeters"/>] attribute.
-    ///// <para/>Class containing tools must be public
-    ///// </summary>
-    //[GPTAttributeFiltered]
+    /// <summary>
+    /// This class has the Attribute [<see cref="GPTAttributeFiltered"/>] 
+    /// which will filter out all methods that do not have the [<see cref="GPTTool"/>] 
+    /// or [<see cref="GPTParemeters"/>] attribute.
+    /// <para/>Class containing tools must be public
+    /// </summary>
+    [GPTAttributeFiltered]
     public class MyToolClassWithAttributes
     {
         /// <summary>
@@ -16,39 +18,39 @@
         /// </summary>
         public static string MethodWithoutAttribute() => "This shoul not be included in the tools";
 
-        ///// <summary>
-        ///// [<see cref="GPTTool"/>] Provides a Description for GPT of this method
-        ///// <code>
-        ///// [GPTTool("This is the Tool1")]
-        ///// public static string Tool1() => "Tool1";
-        ///// </code>
-        ///// </summary>
-        //[GPTTool("This is the Tool1")]
-        //public static string Tool1() => "Tool1";
+        /// <summary>
+        /// [<see cref="GPTTool"/>] Provides a Description for GPT of this method
+        /// <code>
+        /// [GPTTool("This is the Tool1")]
+        /// public static string Tool1() => "Tool1";
+        /// </code>
+        /// </summary>
+        [GPTTool("This is the Tool1")]
+        public static string Tool1() => "Tool1";
 
-        ///// <summary>
-        ///// [<see cref="GPTParameters"/>] Provides a Description of the parameters for GPT of this method
-        ///// Note that this code:
-        ///// <code>[GPTParameters(parameter1: "This is a number", parameter2: "This is a useless parameter description that will be ignored")]
-        ///// public static string Tool2(int size) => "Tool2";
-        ///// </code>
-        ///// will not produce an error even tough a parameter is decribed that isn't there.
-        ///// This description will just be ignored.
-        ///// </summary>
-        //[GPTParameters(parameter1: "This is a number", parameter2: "This is a useless parameter description that will be ignored")]
-        //public static string Tool2(int size) => "Tool2";
+        /// <summary>
+        /// [<see cref="GPTParameters"/>] Provides a Description of the parameters for GPT of this method
+        /// Note that this code:
+        /// <code>[GPTParameters(parameter1: "This is a number", parameter2: "This is a useless parameter description that will be ignored")]
+        /// public static string Tool2(int size) => "Tool2";
+        /// </code>
+        /// will not produce an error even tough a parameter is decribed that isn't there.
+        /// This description will just be ignored.
+        /// </summary>
+        [GPTParameters("This is a number", "This is a useless parameter description that will be ignored")]
+        public static string Tool2(int size) => "Tool2";
 
-        ///// <summary>
-        ///// Full example with [<see cref="GPTTool"/>] and [<see cref="GPTParameters"/>]
-        ///// <code>
-        ///// [GPTTool("This is the Tool3")]
-        ///// [GPTParameters(parameter1: "This is a number")]
-        ///// public static string Tool3(int number) => "Tool3";
-        ///// </code>
-        ///// </summary>
-        //[GPTTool("This is the Tool3")]
-        //[GPTParameters(parameter1: "This is a number")]
-        //public static string Tool3(int number) => "Tool3";
+        /// <summary>
+        /// Full example with [<see cref="GPTTool"/>] and [<see cref="GPTParameters"/>]
+        /// <code>
+        /// [GPTTool("This is the Tool3")]
+        /// [GPTParameters(parameter1: "This is a number")]
+        /// public static string Tool3(int number) => "Tool3";
+        /// </code>
+        /// </summary>
+        [GPTTool("This is the Tool3")]
+        [GPTParameters("This is a number")]
+        public static string Tool3(int number) => "Tool3";
 
         /// <summary>
         /// Non static Methods can't be used by GPT and can't have GPT Attributes
