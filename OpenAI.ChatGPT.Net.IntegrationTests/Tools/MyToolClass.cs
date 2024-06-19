@@ -1,4 +1,6 @@
-﻿namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
+﻿using OpenAI.ChatGPT.Net.Tools;
+
+namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
 {
     /// <summary>
     /// Class containing tools must be public
@@ -27,12 +29,12 @@
             return "RemovedTool executed";
         }
 
-        ///// <summary>
-        ///// Methods locked with [<see cref="GPTLcckMethod"/>] can't be used by GPT even if you attempt to add them.
-        ///// </summary>
-        ///// <returns></returns>
-        //[GPTLockMethod]
-        //public static string LockedMethod() => "LockedMethod executed";
+        /// <summary>
+        /// Methods locked with [<see cref="GPTLcckMethod"/>] can't be used by GPT even if you attempt to add them.
+        /// </summary>
+        /// <returns></returns>
+        [GPTLockMethod]
+        public static string LockedMethod() => "LockedMethod executed";
 
 
         /// <summary>
