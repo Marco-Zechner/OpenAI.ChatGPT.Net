@@ -7,11 +7,12 @@
 Placeholder
 [![NuGet Package](https://img.shields.io/nuget/v/OpenAI.ChatGPT.Net?logo=NuGet&color=004880&label=NuGet)](https://www.nuget.org/packages/OpenAI.ChatGPT.Net)
 [![NuGet Package](https://img.shields.io/nuget/dt/OpenAI.ChatGPT.Net?color=%23004880&label=Downloads&logo=NuGet)](https://www.nuget.org/packages/OpenAI.ChatGPT.Net)
-[![GitHub issues](https://img.shields.io/github/issues/yourusername/OpenAI.ChatGPT.Net?label=Issues&logo=GitHub)](https://github.com/yourusername/OpenAI.ChatGPT.Net/issues)
-[![GitHub forks](https://img.shields.io/github/forks/yourusername/OpenAI.ChatGPT.Net?label=Forks&logo=GitHub)](https://github.com/yourusername/OpenAI.ChatGPT.Net/network)
-[![GitHub stars](https://img.shields.io/github/stars/yourusername/OpenAI.ChatGPT.Net?label=Stars&logo=GitHub)](https://github.com/yourusername/OpenAI.ChatGPT.Net/stargazers)
-[![GitHub license](https://img.shields.io/github/license/yourusername/OpenAI.ChatGPT.Net?label=License&logo=GitHub)](https://github.com/yourusername/OpenAI.ChatGPT.Net/blob/main/LICENSE)
 ```
+[![GitHub issues](https://img.shields.io/github/issues/Marco-Zechner/OpenAI.ChatGPT.Net?label=Issues&logo=GitHub)](https://github.com/Marco-Zechner/OpenAI.ChatGPT.Net/issues)
+[![GitHub forks](https://img.shields.io/github/forks/Marco-Zechner/OpenAI.ChatGPT.Net?label=Forks&logo=GitHub)](https://github.com/Marco-Zechner/OpenAI.ChatGPT.Net/network)
+[![GitHub stars](https://img.shields.io/github/stars/Marco-Zechner/OpenAI.ChatGPT.Net?label=Stars&logo=GitHub)](https://github.com/Marco-Zechner/OpenAI.ChatGPT.Net/stargazers)
+[![GitHub license](https://img.shields.io/github/license/Marco-Zechner/OpenAI.ChatGPT.Net?label=License&logo=GitHub)](https://github.com/Marco-Zechner/OpenAI.ChatGPT.Net/blob/main/LICENSE)
+
 
 OpenAI.ChatGPT.Net is a C# library built on .NET 8.0 that provides an easy-to-use interface for integrating with the OpenAI ChatGPT API. This library allows developers to manage chat histories, integrate dynamic tools, and generate responses efficiently.
 
