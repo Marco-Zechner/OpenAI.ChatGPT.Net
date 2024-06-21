@@ -1,8 +1,6 @@
 
 # OpenAI.ChatGPT.Net - .NET 8.0 Library for ChatGPT
 
-# This is just the goal for now. NOT READY TO USE
-
 ```
 Placeholder
 [![NuGet Package](https://img.shields.io/nuget/v/OpenAI.ChatGPT.Net?logo=NuGet&color=004880&label=NuGet)](https://www.nuget.org/packages/OpenAI.ChatGPT.Net)
