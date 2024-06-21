@@ -183,11 +183,11 @@ model.AddToolClass<MyToolClass>()                           // Adds all tools fr
 
 Utilize custom attributes to add metadata or control the inclusion of tools. Below are the attributes you can use:
 
-- **`[GPTTool]`**: Marks a method available for GPT, OVERRIDES `[GPTLocked]` on the class
-- **`[GPTParameters]`**: Adds descriptions for method parameters, providing details about each expected parameter.
-- **`[GPTDescription]`**: Adds a description to a class, method, or property, providing context for GPT.
-- **`[GPTData]`**: Defines access for a property, specifying whether it’s read-only, write-only, or both.
-- **`[GPTLocked]`**: Marks a method or class as locked, preventing it from being used by GPT.
+- **`[GPT_Tool]`**: Marks a method available for GPT, OVERRIDES `[GPT_Locked]` on the class
+- **`[GPT_Parameters]`**: Adds descriptions for method parameters, providing details about each expected parameter.
+- **`[GPT_Description]`**: Adds a description to a class, method, or property, providing context for GPT.
+- **`[GPT_Data]`**: Defines access for a property, specifying whether it’s read-only, write-only, or both.
+- **`[GPT_Locked]`**: Marks a method or class as locked, preventing it from being used by GPT.
 
 ### Example of Tool Class with Attributes
 
@@ -197,7 +197,7 @@ Refer to the following examples in
 for detailed implementations:
 
 ```csharp
-[GPTDescription("This class provides time-related utilities.")]
+[GPT_Description("This class provides time-related utilities.")]
 public class MyTools
 {
     /// <summary>
@@ -212,7 +212,7 @@ public class MyTools
         return use24h ? time.ToString("HH:mm") : time.ToString("hh:mm tt");
     }
 
-    [GPTLocked]
+    [GPT_Locked]
     public static void LockedMethod()
     {
         // Method implementation that should not be accessible by GPT
@@ -225,7 +225,7 @@ They also need to implement an Empty constructor.
 See the implementation Example below:
 
 ```csharp
-[Description("Instance of a Car")]
+[GPT_Description("Instance of a Car")]
 public class CarInstance(string carName, int horsePower, string producer) : InstanceToolsManager<CarInstance>(carName)
 {
     public int horsePower = horsePower;
@@ -289,9 +289,18 @@ public static async Task Run()
          .AddToolClass<MyToolClassWithAttributes>();
 
     // Register instance tools and properties
-    model.AddConstructor<CarInstance>()
-         .AddTool<CarInstance>(ci => ci.TurnOn)
+    model.AddTool<CarInstance>(ci => ci.TurnOn)
          .AddProperty<CarInstance>(ci => ci.isOn);
+
+    // Allow GPT to create and destroy instances on it's own
+    model.AddConstructor<CarInstance>([typeof(string), typeof(int), typeof(string)])
+         .RemoveConstructor<CarInstance>()           // () means all overloads
+         .AddConstructor<CarInstance>([])            // ([]) means the constructor with no arguments
+         .AddDestructor<CarInstance>();
+
+    // Or create instances for GPT yourself
+    long ID = CarInstance.Construct(new CarInstance("R8", 1000, "Audi"));
+    CarInstance.Destruct(ID);
 
     // Set up a custom tool call handler
     model.SetToolCallHandler(new ToolCallHandlerWrapper
