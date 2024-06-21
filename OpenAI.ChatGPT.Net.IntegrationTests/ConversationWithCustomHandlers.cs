@@ -1,5 +1,8 @@
 ﻿using OpenAI.ChatGPT.Net.DataModels;
+using OpenAI.ChatGPT.Net.Enums;
 using OpenAI.ChatGPT.Net.Exeptions;
+using OpenAI.ChatGPT.Net.IntegrationTests.Handlers;
+using OpenAI.ChatGPT.Net.Interfaces;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests
 {
@@ -7,28 +10,10 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests
     {
         public static async Task Run()
         {
-            static string PrintPayloadHandler(string payload)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Payload:");
-                Console.WriteLine(payload);
-                Console.ResetColor();
-                return payload;
-            }
-
-            static string PrintResponseHandler(string response)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Response:");
-                Console.WriteLine(response);
-                Console.ResetColor();
-                return response;
-            }
-
             GPTModel model = new("f", APIKey.KEY)
             {
-                PayloadHandler = PrintPayloadHandler,
-                ResponseHandler = PrintResponseHandler,
+                PayloadHandler = JsonDebugHandlers.PrintPayloadHandler,
+                ResponseHandler = JsonDebugHandlers.PrintResponseHandler,
                 Logprobs = true,
                 TopLogprobs = 2
             };
@@ -41,7 +26,7 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests
 
             Console.Write($"{ChatRole.User}: ");
             ChatMessage initialMessage = new(ChatRole.User, Console.ReadLine());
-            List<ChatMessage> messageHistory = [initialMessage];
+            List<IMessage> messageHistory = [initialMessage];
 
             while (true)
             {

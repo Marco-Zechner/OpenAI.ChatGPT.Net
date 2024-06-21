@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using OpenAI.ChatGPT.Net.Enums;
 
 namespace OpenAI.ChatGPT.Net.DataModels
 {

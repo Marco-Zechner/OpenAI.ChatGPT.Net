@@ -1,4 +1,5 @@
 ﻿using OpenAI.ChatGPT.Net.DataModels;
+using OpenAI.ChatGPT.Net.Enums;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests
 {

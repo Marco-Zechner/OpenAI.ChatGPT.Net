@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using OpenAI.ChatGPT.Net.Interfaces;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -16,7 +17,7 @@ namespace OpenAI.ChatGPT.Net.DataModels
             return JsonConvert.DeserializeObject<ChatResponse>(jsonResponse) ?? throw new JsonSerializationException("Deserialization failed.");
         }
 
-        private string GenerateJsonPayload(List<ChatMessage> messages)
+        private string GenerateJsonPayload(List<IMessage> messages)
         {
             ChatGPTRequest requestBody = new(
                 Messages: messages,

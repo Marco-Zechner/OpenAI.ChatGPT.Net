@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OpenAI.ChatGPT.Net.DataModels;
+using OpenAI.ChatGPT.Net.Interfaces;
 
 namespace OpenAI.ChatGPT.Net.JsonConverters
 {
@@ -20,7 +21,9 @@ namespace OpenAI.ChatGPT.Net.JsonConverters
 
             var jsonObject = new JObject
             {
-                ["messages"]            = JArray.FromObject(value.Messages ?? []),
+                ["messages"]            = new JArray(value.Messages.Select(msg => msg is ChatMessage chatMsg ?
+                                            JObject.FromObject(chatMsg, serializer) :
+                                            JObject.FromObject((ToolCallResponse)msg, serializer))),
                 ["model"]               = value.Model ?? "no model set",
                 ["frequency_penalty"]   = GetOrDefaultToNull(value.FrequencyPenalty, 0.0),
                 ["logit_bias"]          = GetOrDefaultToNull(value.LogitBias, lb => !(lb?.Count > 0)),
@@ -36,44 +39,77 @@ namespace OpenAI.ChatGPT.Net.JsonConverters
                                         : GetOrDefaultToNull(value.StreamOptions, so => so == null || !so.IncludeUsage)
                 ["temperature"]         = GetOrDefaultToNull(value.Temperature, 1),
                 ["top_p"]               = GetOrDefaultToNull(value.TopP, 1),
-                ["tools"]               = GetOrDefaultToNull(value.Tools, t => !(t?.Count > 0)),
-                ["tool_choice"]         = !(value.Tools?.Count > 0) ? JValue.CreateNull() 
-                                        : GetOrDefaultToNull(value.ToolChoice, tc => tc == null)
                 ["parallel_tool_calls"] = !(value.Tools?.Count > 0) ? JValue.CreateNull() 
                                         : GetOrDefaultToNull(value.ParallelToolCalls, true),
                 ["user"]                = GetOrDefaultToNull(value.User, string.IsNullOrEmpty)
             };
-            
 
-            // Handle Tools and ToolChoice NOT TESTED!!!
-            if (value.Tools == null || value.Tools.Count == 0 || value.ToolChoice == null || value.ToolChoice.Choice == "none")
-            {
-                jsonObject.Remove("tools");
-                jsonObject.Remove("tool_choice");
-            }
-            else
+
+            if (value.Tools != null && value.Tools.Count > 0)
             {
                 if (value.Tools.Count > 128)
                 {
                     throw new ArgumentException("Tools count cannot exceed 128.");
                 }
 
-                if (value.Tools.Count > 0 && value.ToolChoice.Choice == "auto")
+                if (value.ToolChoice != null)
                 {
-                    jsonObject.Remove("tool_choice");
+                    if (!string.IsNullOrEmpty(value.ToolChoice.Choice))
+                    {
+                        var toolChoiceObject = new JObject
+                        {
+                            ["tool_choice"] = value.ToolChoice.Choice
+                        };
+                        jsonObject["tool_choice"] = toolChoiceObject;
+                    }
+                    else if (value.ToolChoice.Tool != null)
+                    {
+                        var toolChoiceObject = new JObject
+                        {
+
+                            ["function"] = value.ToolChoice.Tool != null ? new JObject
+                            {
+                                ["type"] = value.ToolChoice.Tool.Type,
+                                ["function"] = new JObject
+                                {
+                                    ["name"] = value.ToolChoice.Tool.Function.Name
+                                }
+                            } : JValue.CreateNull()
+                        };
+                        jsonObject["tool_choice"] = toolChoiceObject;
+                    }
                 }
 
-                if (value.ToolChoice.Tool != null)
+                var toolsArray = new JArray();
+                foreach (var tool in value.Tools)
                 {
-                    // yes I actually remove all other tools, but this is just cheaper for the same functionality
-                    // if I where to send all tools AND the tool_choice, it would take far more token to tell gpt to use only one specific tool
-                    // in this way I only give gpt 1 tool and tell him that he must at least use 1 tool. That should be the same.
-                    var toolName = value.ToolChoice.Tool.Function.Name;
-                    var tool = value.Tools.FirstOrDefault(t => t.Function.Name == toolName) 
-                        ?? throw new ArgumentException($"Tool '{toolName}' specified in ToolChoice is not in the Tools list.");
-                    jsonObject["tools"] = new JArray { JToken.FromObject(tool, serializer) };
-                    jsonObject["tool_choice"] = "required";
+                    var toolObject = new JObject
+                    {
+                        ["type"] = tool.Type,
+                        ["function"] = new JObject
+                        {
+                            ["name"] = tool.Function.Name,
+                            ["description"] = tool.Function.Description,
+                            ["parameters"] = new JObject
+                            {
+                                ["type"] = tool.Function.Parameters.Type,
+                                ["properties"] = new JObject(
+                                    tool.Function.Parameters.Properties.Select(p =>
+                                        new JProperty(p.Key, new JObject
+                                        {
+                                            ["type"] = p.Value.Type,
+                                            ["description"] = p.Value.Description,
+                                            ["enum"] = p.Value.Enum != null ? JArray.FromObject(p.Value.Enum) : null
+                                        })
+                                    )
+                                ),
+                                ["required"] = JArray.FromObject(tool.Function.Parameters.Required)
+                            }
+                        }
+                    };
+                    toolsArray.Add(toolObject);
                 }
+                jsonObject["tools"] = toolsArray;
             }
 
             RemoveNullProperties(jsonObject);
@@ -94,8 +130,16 @@ namespace OpenAI.ChatGPT.Net.JsonConverters
         {
             var jsonObject = JObject.Load(reader);
 
-            var messages            = jsonObject["messages"]?           .ToObject<List<ChatMessage>>(serializer) ?? [];
-            var model               = jsonObject["model"]?              .ToObject<string>(serializer) ?? throw new JsonSerializationException("Model is required.");
+            var messages = jsonObject["messages"]?.Children().Select(token =>
+            {
+                var role = token["role"]?.ToString();
+                return role switch
+                {
+                    "user" or "assistant" => token.ToObject<ChatMessage>(serializer) as IMessage,
+                    "tool" => token.ToObject<ToolCallResponse>(serializer) as IMessage,
+                    _ => throw new JsonSerializationException($"Unknown message role: {role}")
+                };
+            }).ToList() ?? []; var model               = jsonObject["model"]?              .ToObject<string>(serializer) ?? throw new JsonSerializationException("Model is required.");
             var frequencyPenalty    = jsonObject["frequency_penalty"]?  .ToObject<double>(serializer) ?? 0.0;
             var logitBias           = jsonObject["logit_bias"]?         .ToObject<Dictionary<int, int>>(serializer);
             var logprobs            = jsonObject["logprobs"]?           .ToObject<bool>(serializer) ?? false;

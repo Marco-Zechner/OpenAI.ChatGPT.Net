@@ -9,12 +9,8 @@ namespace OpenAI.ChatGPT.Net.DataModels
     {
         public ToolChoice() : this(null, null) { }
 
-        public ToolChoice(string choice) : this(choice, null)
-        {
-        }
-        
-        public ToolChoice(Tool tool) : this(null, tool)
-        {
-        }
+        public ToolChoice(string choice) : this(choice, null) { }
+
+        public ToolChoice(Tool tool) : this(null, tool) { }
     }
 }

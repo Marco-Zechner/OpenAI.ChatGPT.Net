@@ -1,4 +1,4 @@
-﻿using OpenAI.ChatGPT.Net.Tools;
+﻿using OpenAI.ChatGPT.Net.Attributes;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
 {
@@ -7,6 +7,9 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
     /// </summary>
     public class MyToolClass
     {
+        public static int MyField;
+        public static int MyProperty { get; set; }
+
         public static string Tool1() => "Tool1";
        
         public static string Tool2() => "Tool2";
@@ -30,10 +33,10 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
         }
 
         /// <summary>
-        /// Methods locked with [<see cref="GPTLcckMethod"/>] can't be used by GPT even if you attempt to add them.
+        /// Methods locked with [<see cref="GPT_Locked"/>] can't be used by GPT even if you attempt to add them.
         /// </summary>
         /// <returns></returns>
-        [GPTLockMethod]
+        [GPT_Locked]
         public static string LockedMethod() => "LockedMethod executed";
 
 
