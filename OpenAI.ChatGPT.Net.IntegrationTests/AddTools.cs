@@ -1,169 +1,50 @@
 ﻿using OpenAI.ChatGPT.Net.DataModels;
 using OpenAI.ChatGPT.Net.Enums;
 using OpenAI.ChatGPT.Net.Exeptions;
+using OpenAI.ChatGPT.Net.InstanceTools;
 using OpenAI.ChatGPT.Net.IntegrationTests.Handlers;
 using OpenAI.ChatGPT.Net.IntegrationTests.InstanceTools;
 using OpenAI.ChatGPT.Net.IntegrationTests.Tools;
 using OpenAI.ChatGPT.Net.Interfaces;
-using OpenAI.ChatGPT.Net.InstanceTools;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests
 {
-
     internal class AddTools
     {
         public static async Task Run()
         {
-
             GPTModel model = new("gpt-4o", APIKey.KEY)
             {
                 ResponseHandler = JsonDebugHandlers.PrintResponseHandler,
                 PayloadHandler = JsonDebugHandlers.PrintPayloadHandler,
-                toolCallHandler = new MyToolHandler(),
+                //toolCallHandler = new MyToolHandler(), // TEST IF IT WILL CRASH WIHTOUT TOOLCALLHANDLER IF TOOLS ARE NOT ADDED... FIX THIS
                 MaxTokens = 1000
             };
 
-            //====== STATIC TOOLS ======\\
+            AddStaticTools(ref model);
 
-            // Adding a public static method as a Tool.
-            model.AddTool(() => MyTools.GetTime)
+            //AddInstanceTools(ref model);
 
-            // In case of overloads, you can specify the method signature
-            .AddTool(() => new Func<int, bool, string>(MyTools.GetTime))
-
-            // Removing a specific Tool
-            .RemoveTool(() => MyTools.GetTime)
-            .RemoveTool(() => new Func<int, bool, string>(MyTools.GetTime));
-
-            // Adding a public static properties GETTER and SETTER as a Tool.
-            model.AddProperty(() => MyToolClass.MyProperty)
-            /* NOTE:
-            Please keep in mind that the getter or setter must be public to be added.
-            If only the getter is public, then only the getter will be added.
-             */
-
-            // You can also filter to only use the GETTER or SETTER of a property
-            .AddProperty(() => MyToolClass.MyProperty, PropertyAccess.Getter);
-            /* NOTE:
-            Trying to add a the Getter specifically while it is private will throw an error.
-             */
-
-            //Same rules for removing properties
-            model.RemoveProperty(() => MyToolClass.MyProperty)
-            .RemoveProperty(() => MyToolClass.MyProperty, PropertyAccess.Getter);
-
-            // Adding all
-            // - public static methods
-            // - GETTER/SETTER from static properties
-            // of a class as Tools. Excludes methods & properties with the [GPT_Locked] attribute
-            model.AddToolClass<MyToolClass>()
-
-            // This class has the [GPT_Locked] attribute
-            // Only methods with the [GPT_Tool] attribute will be added
-            .AddToolClass<MyToolClassWithAttributes>();
-
-            //--!!-- INVALID USAGE --!!--\\
-            // Trying to Add a Method with the [GPT_Locked] attribute will throw an Error
-            //model.AddTool(() => MyToolClass.LockedMethod)
-            // Trying to Add a Class with the [GPT_Locked] attribute, where no methods have the [GPT_Tool] attribute will throw an Error
-            //.AddToolClass<LockedClass>()
-            // Trying to Add a Class where all methods have the [GPT_Locked] attribute will throw an Error
-            //.AddToolClass<AllLockedMethods>()
-            // Trying to Add a Field as a Property will throw an Error
-            //.AddProperty(() => MyToolClass.MyField);
-
-
-
-            //====== INSTANCE TOOLS ======\\
-            /* NOTE:
-            (valid): To be able to add instance methods, the class must inherit from InstanceToolsManager<T>
-             */
-
-            /* NOTE: 
-            When you add the 1. instance Tool/Property of any (valid) class,
-            there will be 4 additional tools from InstanceToolsManager<InstanceType> added:
-            
-            + List<(long instanceID, string instanceName) GetInstances()
-            + bool InstanceExists(long instanceID)
-            + InstanceType? GetFullInstanceDetail(long instanceID)
-            and this Class will be added as a Valid usecase
-            
-            + string Destruct(long instanceID)
-            but this Class will per default NOT be added as a Valid usecase. ==> Must be added specifically with 'AddDestructor'
-            You can change the default with 'model.InstanceDestructorEnabledPerDefault = true'
-            SUBNOTE: xD
-            > Changing the default afterwards will not change the already added classes.
-            
-            To save Tokens and thus also Money, these 4 Tools exist only once, and are designed so that the API can use them for all Subclasses.
-            The Constructor can't be done in this why, since each Constructor can have different parameters.
-            */
-
-            // Adding a Tool that can destroy an instance of the class
-            model.AddDestructor<CarInstance>();
-            // Removing the Destructor Tool
-            model.RemoveDestructor<CarInstance>();
-
-            // Adding all constructors of this class as Tools
-            model.AddConstructor<CarInstance>();
-
-            // Adding specific constructors of this class as Tools
-            model.AddConstructor<CarInstance>([typeof(string), typeof(int), typeof(string)]);
-            model.AddConstructor<CarInstance>([]); // empty constructor
-            model.AddConstructor<CarInstance>([typeof(int)]);
-
-            // Removing a specific constructor 
-            model.RemoveConstructor<CarInstance>([typeof(int)]);
-            model.RemoveConstructor<CarInstance>([]);
-
-
-            // Adding a public instance method as a Tool.
-            model.AddTool<CarInstance>(ci => ci.TurnOn)
- 
-            .AddTool<CarInstance>(ci => new Func<int, int>(ci.FuelUp))
-            .AddTool<CarInstance>(ci => new Func<double, int>(ci.FuelUp));
-            model.RemoveTool<CarInstance>(ci => new Func<int, int>(ci.FuelUp));
-
-            model.AddProperty<CarInstance>(ci => ci.isOn);
-            model.RemoveProperty<CarInstance>(ci => ci.isOn);
-
-            // Adding all
-            // - public instance methods
-            // - GETTER/SETTER from instance properties
-            // of a class as Tools. Excludes methods & properties with the [GPT_Locked] attribute
-            model.AddToolClass<CarInstance>(MethodAccessType.InstanceOnly);
-            /* Note:
-            MethodAccessType.StaticAndInstance
-            will add ALL public methods and the GETTER/SETTER of properties
-             */
-
-            //--!!-- INVALID USAGE --!!--\\
-            // Same rules as the Static Tools
-            // Additonally:
-            // Trying to use a Class that does not inherit from InstanceToolsManager<T> as a InstanceClass will throw an Error
-            //model.AddTool<MyToolClass>(tc => tc.NonStaticMethod);
-            //model.AddToolClass<MyToolClass>(MethodAccessType.StaticAndInstance);
-
-
-            int maxToolCalls = 3;
+            //int maxToolCalls = 3;
             // You can also parse values to the ToolHandler
-            model.SetToolCallHandler(new MyToolHandler(maxToolCalls));
+            //model.SetToolCallHandler(new MyToolHandler(maxToolCalls));
 
-            // You can also define a simpler version with the Wrapper
-            model.SetToolCallHandler(new ToolCallHandlerWrapper()
-            {
-                ToolCall = (toolName, toolParameters, toolCallIndex) =>
-                {
-                    Console.WriteLine($"GPT wants to call {toolName} with parameters: {string.Join(", ", toolParameters)}");
-                    return (true, "");
-                },
-                ToolResponse = (toolCallIndex, response) =>
-                {
-                    Console.WriteLine($"Lambda: Tool response for call #{toolCallIndex}: {response}");
-                    return $"Lambda: Tool response for call #{toolCallIndex}: {response}";
-                }
-            });
+            //// You can also define a simpler version with the Wrapper
+            //model.toolCallHandler = (new ToolCallHandlerWrapper()
+            //{
+            //    ToolCall = (toolName, toolParameters, toolCallIndex) =>
+            //    {
+            //        Console.WriteLine($"GPT wants to call {toolName} with parameters: {string.Join(", ", toolParameters)}");
+            //        return (true, "");
+            //    },
+            //    ToolResponse = (toolCallIndex, response) =>
+            //    {
+            //        Console.WriteLine($"Lambda: Tool response for call #{toolCallIndex}: {response}");
+            //        return $"Lambda: Tool response for call #{toolCallIndex}: {response}";
+            //    }
+            //});
 
-            
+
             // Simple Conversation Code
 
             Console.Write($"{ChatRole.User}: ");
@@ -193,6 +74,135 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests
                 ChatMessage nextMessage = new(ChatRole.User, Console.ReadLine());
                 messageHistory.Add(nextMessage);
             }
+        }
+
+        public static void AddStaticTools(ref GPTModel model)
+        {
+            //====== STATIC TOOLS ======\\
+
+            // Adding a public static method as a Tool.
+            model.AddTool(() => MyTools.GetTime);
+
+            // In case of overloads, you can specify the method signature
+            model.AddTool(() => new Func<double, bool, string>(MyTools.GetTime2))
+
+            // Removing a specific Tool
+            .RemoveTool(() => MyTools.GetTime)
+            .RemoveTool(() => new Func<double, bool, string>(MyTools.GetTime2));
+
+
+
+            // Adding a public static properties GETTER and SETTER as a Tool.
+            model.AddProperty(() => MyToolClass.MyProperty)
+            /* NOTE:
+            Please keep in mind that the getter or setter must be public to be added.
+            If only the getter is public, then only the getter will be added.
+             */
+
+            // You can also filter to only use the GETTER or SETTER of a property
+            .AddProperty(() => MyToolClass.MyProperty, PropertyAccess.Getter);
+            /* NOTE:
+            Trying to add a the Getter specifically while it is private will throw an error.
+             */
+
+            //Same rules for removing properties
+            model.RemoveProperty(() => MyToolClass.MyProperty)
+            .RemoveProperty(() => MyToolClass.MyProperty, PropertyAccess.Getter);
+
+            // Adding all
+            // - public static methods
+            // - GETTER/SETTER from static properties
+            // of a class as Tools. Excludes methods & properties with the [GPT_Locked] attribute
+            model.AddToolClass<MyToolClass>()
+
+            // This class has the [GPT_Locked] attribute
+            // Only methods with the [GPT_Tool] attribute will be added
+            .AddToolClass<MyToolClassWithAttributes>();
+            // Filter tools out again.
+            model.RemoveTool(() => MyToolClassWithAttributes.Tool2);
+
+            //--!!-- INVALID USAGE --!!--\\
+            // Trying to Add a Method with the [GPT_Locked] attribute will throw an Error
+            //model.AddTool(() => MyToolClass.LockedMethod)
+            // Trying to Add a Class with the [GPT_Locked] attribute, where no methods have the [GPT_Tool] attribute will throw an Error
+            //.AddToolClass<LockedClass>()
+            // Trying to Add a Class where all methods have the [GPT_Locked] attribute will throw an Error
+            //.AddToolClass<AllLockedMethods>()
+            // Trying to Add a Field as a Property will throw an Error
+            //.AddProperty(() => MyToolClass.MyField);
+        }
+
+        public static void AddInstanceTools(ref GPTModel model)
+        {
+            //====== INSTANCE TOOLS ======\\
+            /* NOTE:
+            (valid): To be able to add instance methods, the class must inherit from InstanceToolsManager<T>
+             */
+
+            /* NOTE: 
+            When you add the 1. instance Tool/Property of any (valid) class,
+            there will be 4 additional tools from InstanceToolsManager<InstanceType> added:
+            
+            + List<(long instanceID, string instanceName) GetInstances()
+            + bool InstanceExists(long instanceID)
+            + InstanceType? GetFullInstanceDetail(long instanceID)
+            and this Class will be added as a Valid usecase
+            
+            + string Destruct(long instanceID)
+            but this Class will per default NOT be added as a Valid usecase. ==> Must be added specifically with 'AddDestructor'
+            You can change the default with 'model.InstanceDestructorEnabledPerDefault = true'
+            SUBNOTE: xD
+            > Changing the default afterwards will not change the already added classes.
+            
+            To save Tokens and thus also Money, these 4 Tools exist only once, and are designed so that the API can use them for all Subclasses.
+            The Constructor can't be done in this why, since each Constructor can have different parameters.
+            */
+
+            // Adding a Tool that can destroy an instance of the class
+            // NOT IMPLEMENTED YET
+            //model.AddDestructor<CarInstance>(); // tries to call it even if he doesn't have access to it...
+            //// Removing the Destructor Tool
+            //model.RemoveDestructor<CarInstance>();
+
+            //// Adding all constructors of this class as Tools
+            //model.AddConstructor<CarInstance>();
+
+            //// Adding specific constructors of this class as Tools
+            //model.AddConstructor<CarInstance>([typeof(string), typeof(int), typeof(string)]);
+            //model.AddConstructor<CarInstance>([]); // empty constructor
+            //model.AddConstructor<CarInstance>([typeof(int)]);
+
+            //// Removing a specific constructor 
+            //model.RemoveConstructor<CarInstance>([typeof(int)]);
+            //model.RemoveConstructor<CarInstance>([]);
+
+
+            // Adding a public instance method as a Tool.
+            model.AddTool<CarInstance>(ci => ci.TurnOn)
+
+            .AddTool<CarInstance>(ci => new Func<int, int>(ci.FuelUp))
+            .AddTool<CarInstance>(ci => new Func<double, int>(ci.FuelUp));
+            model.RemoveTool<CarInstance>(ci => new Func<int, int>(ci.FuelUp));
+
+            model.AddProperty<CarInstance>(ci => ci.isOn);
+            model.RemoveProperty<CarInstance>(ci => ci.isOn);
+
+            // Adding all
+            // - public instance methods
+            // - GETTER/SETTER from instance properties
+            // of a class as Tools. Excludes methods & properties with the [GPT_Locked] attribute
+            model.AddToolClass<CarInstance>(MethodAccessType.InstanceOnly);
+            /* Note:
+            MethodAccessType.StaticAndInstance
+            will add ALL public methods and the GETTER/SETTER of properties
+             */
+
+            //--!!-- INVALID USAGE --!!--\\
+            // Same rules as the Static Tools
+            // Additonally:
+            // Trying to use a Class that does not inherit from InstanceToolsManager<T> as a InstanceClass will throw an Error
+            //model.AddTool<MyToolClass>(tc => tc.NonStaticMethod);
+            //model.AddToolClass<MyToolClass>(MethodAccessType.StaticAndInstance);
         }
     }
 

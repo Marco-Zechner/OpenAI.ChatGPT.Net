@@ -34,7 +34,7 @@ namespace OpenAI.ChatGPT.Net.DataModels
                 StreamOptions: StreamOptions,
                 Temperature: Temperature,
                 TopP: TopP,
-                Tools: tools,
+                Tools: toolCallHandler != null ? toolCallHandler.OnGetAvailableTools(tools) : tools,
                 ToolChoice: toolChoice,
                 ParallelToolCalls: ParallelToolCalls,
                 User: User

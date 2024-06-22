@@ -4,6 +4,8 @@ namespace OpenAI.ChatGPT.Net.DataModels
 {
     public partial class GPTModel
     {
+        public IToolCallHandler? toolCallHandler;
+
         public async Task<ChatResponse> Complete(ChatMessage initialMessage) => await Complete([initialMessage]);
         public async Task<ChatResponse> Complete(List<IMessage> chatHistory)
         {

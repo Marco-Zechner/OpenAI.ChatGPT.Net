@@ -1,10 +1,10 @@
-﻿using OpenAI.ChatGPT.Net.InstanceTools;
-using System.ComponentModel;
+﻿using OpenAI.ChatGPT.Net.Attributes;
+using OpenAI.ChatGPT.Net.InstanceTools;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests.InstanceTools
 {
-    [Description("Instance of a Car")]
-    public class CarInstance(string carName, int horsePower, string producer) : InstanceToolsManager<CarInstance>(carName)
+    [GPT_Description("Instance of a Car")]
+    public class CarInstance(string carName, int horsePower, string producer) : InstanceToolsBase<CarInstance>(carName)
     {
         public int horsePower = horsePower;
         public string producer = producer;

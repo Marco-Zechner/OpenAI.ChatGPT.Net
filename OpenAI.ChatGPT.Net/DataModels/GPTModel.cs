@@ -19,8 +19,8 @@
         public StreamOptions? StreamOptions { get; set; } = null;
         public double? Temperature { get; set; } = 0.7;
         public double? TopP { get; set; } = 0.9;
-        private readonly List<Tool>? tools = null;
-        private readonly ToolChoice? toolChoice = null;
+        private List<Tool>? tools = null;
+        private ToolChoice? toolChoice = null;
         public bool? ParallelToolCalls { get; set; } = true;
         public string? User { get; set; } = null;
     }
