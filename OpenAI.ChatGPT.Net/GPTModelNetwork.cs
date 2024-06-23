@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System.Net.Http.Headers;
+using OpenAI.ChatGPT.Net.Interfaces;
 using System.Text;
 
 namespace OpenAI.ChatGPT.Net.DataModels
@@ -13,10 +13,15 @@ namespace OpenAI.ChatGPT.Net.DataModels
 
         private static ChatResponse GenerateResponse(string jsonResponse)
         {
-            return JsonConvert.DeserializeObject<ChatResponse>(jsonResponse) ?? throw new JsonSerializationException("Deserialization failed.");
+            var response = JsonConvert.DeserializeObject<ChatResponse>(jsonResponse) ?? throw new JsonSerializationException("Deserialization failed.");
+            response = response with
+            {
+                Timestamp = DateTime.Now
+            };
+            return response;
         }
 
-        private string GenerateJsonPayload(List<ChatMessage> messages)
+        private string GenerateJsonPayload(List<IMessage> messages, bool useTools = true)
         {
             ChatGPTRequest requestBody = new(
                 Messages: messages,
@@ -33,11 +38,17 @@ namespace OpenAI.ChatGPT.Net.DataModels
                 StreamOptions: StreamOptions,
                 Temperature: Temperature,
                 TopP: TopP,
-                Tools: tools,
                 ToolChoice: toolChoice,
                 ParallelToolCalls: ParallelToolCalls,
                 User: User
-            );
+            )
+            {
+                Tools = useTools == false
+                    ? []
+                    : toolCallHandler != null
+                        ? toolCallHandler.OnGetAvailableTools(tools) 
+                        : tools
+            };
 
             return JsonConvert.SerializeObject(requestBody, Formatting.Indented);
         }

@@ -1,27 +1,30 @@
 ﻿using OpenAI.ChatGPT.Net.Tools;
+using OpenAI.ChatGPT.Net.InstanceTools;
 
-namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
+namespace OpenAI.ChatGPT.Net.IntegrationTests.InstanceTools
 {
-    [InstanceDescription("Instance of a Car")]
-    public class InstanceToolCar(string carName, int horsePower, string producer) : InstanceToolsManager<InstanceToolCar>(carName)
+    [GPT_Description("Instance of a Car")]
+    public class CarInstance(string carName, int horsePower, string producer) : InstanceToolsBase<CarInstance>(carName)
     {
         public int horsePower = horsePower;
         public string producer = producer;
         public int fuel = 0;
-        public bool isOn = false;
+        public bool isOn { get; set; } = false;
 
-        public InstanceToolCar() : this("CarInstanceExample", 0, "ExampleProducer") { }
+        public CarInstance() : this("CarInstanceExample", 0, "ExampleProducer") { }
+
+        public CarInstance(int horsePower) : this("TestCar", horsePower, "TestProducer") { }
 
         public int FuelUp(int fuelAmount)
         {
             return fuel += fuelAmount;
-        }        
-        
+        }
+
         public int FuelUp(double fuelAmount)
         {
             return fuel += (int)fuelAmount;
-        }        
-        
+        }
+
         public bool TurnOn(bool setOn)
         {
             return isOn = setOn;

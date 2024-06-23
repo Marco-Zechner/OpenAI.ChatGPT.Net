@@ -1,4 +1,5 @@
 ﻿using OpenAI.ChatGPT.Net.DataModels;
+using OpenAI.ChatGPT.Net.Tools;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests
 {
@@ -13,7 +14,7 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests
 
             ChatMessage initialMessage = new(ChatRole.User, "How are you?");
 
-            ChatResponse response = await model.Complete(initialMessage);
+            ChatResponse response = await model.CompletionAsync(initialMessage);
 
             if (response.Error != null)
             {
@@ -30,7 +31,7 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests
 
             GPTModel model = new("gpt-4o", APIKey.KEY);
             ChatMessage initialMessage = new(ChatRole.User, input);
-            ChatResponse response = await model.Complete(initialMessage);
+            ChatResponse response = await model.CompletionAsync(initialMessage);
       
             Console.WriteLine((ChatMessage)response);
         }

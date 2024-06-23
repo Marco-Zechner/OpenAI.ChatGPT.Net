@@ -1,5 +1,7 @@
 ﻿using OpenAI.ChatGPT.Net.DataModels;
+using OpenAI.ChatGPT.Net.Tools;
 using OpenAI.ChatGPT.Net.Exeptions;
+using OpenAI.ChatGPT.Net.Interfaces;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests
 {
@@ -11,13 +13,13 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests
 
             Console.Write($"{ChatRole.User}: ");
             ChatMessage initialMessage = new(ChatRole.User, Console.ReadLine());
-            List<ChatMessage> messageHistory = [initialMessage];
+            List<IMessage> messageHistory = [initialMessage];
 
             try
             {
                 while (true)
                 {
-                    ChatResponse response = await model.Complete(messageHistory);
+                    ChatResponse response = await model.CompletionAsync(messageHistory);
 
                     ChatMessage message = (ChatMessage)response;
                     Console.WriteLine(message);

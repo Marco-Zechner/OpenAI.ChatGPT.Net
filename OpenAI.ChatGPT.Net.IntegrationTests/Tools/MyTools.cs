@@ -15,6 +15,20 @@
         {
             var time = DateTime.UtcNow.AddHours(timeZoneOffset);
             return use24h ? time.ToString("HH:mm") : time.ToString("hh:mm tt");
+        }        
+        
+        // Overload with different JSON types
+        public static string GetTime2(float timeZoneOffset, bool use24h)
+        {
+            var time = DateTime.UtcNow.AddHours(timeZoneOffset);
+            return use24h ? time.ToString("HH:mm") : time.ToString("hh:mm tt");
+        }        
+        
+        // Overload with same JSON types
+        public static string GetTime2(double timeZoneOffset, bool use24h)
+        {
+            var time = DateTime.UtcNow.AddHours(timeZoneOffset);
+            return use24h ? time.ToString("HH:mm") : time.ToString("hh:mm tt");
         }
     }
 }
