@@ -61,10 +61,12 @@ using OpenAI.ChatGPT.Net.DataModels;
 string? input = Console.ReadLine();
 
 GPTModel model = new("gpt-4o", APIKey.KEY);
-ChatMessage initialMessage = new(ChatRole.User, input);
-ChatResponse response = await model.Complete(initialMessage);
+ChatMessage singleMessage = new(ChatRole.User, input);
+ChatResponse response = await model.CompletionAsync(singleMessage);
       
 Console.WriteLine((ChatMessage)response);
+// casting is required because a response can contain multiple messages (if the setting is enabled) and tool call information (if tools are added)
+// casting will give you the 1. message if there are multiple.
 ```
 
 You can also specify all the other parameters on the model. For more information on the parameters see the [OpenAI Docu](https://platform.openai.com/docs/api-reference/chat/create)
@@ -78,8 +80,8 @@ GPTModel model = new("gpt-4o", APIKey.KEY)
 If the API responds with an Error you can either handle it directly or catch the error when trying to parse the response to a message
 ```csharp
 GPTModel model = new("invalidModel", APIKey.KEY);
-ChatMessage initialMessage = new(ChatRole.User, "This will produce an error because \"invalidModel\" is not a valid model");
-ChatResponse response = await model.Complete(initialMessage);
+ChatMessage singleMessage = new(ChatRole.User, "This will produce an error because \"invalidModel\" is not a valid model");
+ChatResponse response = await model.CompletionAsync(singleMessage);
 
 if (response.Error != null)
 {
@@ -91,8 +93,8 @@ Console.WriteLine((ChatMessage)response);
 ```
 ```csharp
 GPTModel model = new("invalidModel", APIKey.KEY);
-ChatMessage initialMessage = new(ChatRole.User, "This will produce an error because \"invalidModel\" is not a valid model");
-ChatResponse response = await model.Complete(initialMessage);
+ChatMessage singleMessage = new(ChatRole.User, "This will produce an error because \"invalidModel\" is not a valid model");
+ChatResponse response = await model.CompletionAsync(singleMessage);
 
 try {
   Console.WriteLine((ChatMessage)response);
@@ -133,7 +135,7 @@ GPTModel model = new("gpt-4o", APIKey.KEY)
 };
 ```
 
-## Tools (CONCEPT PHASE, NOT YET IMPLEMENTED)
+## Tools (TESTING PHASE, static tools should work)
 
 OpenAI.ChatGPT.Net allows for dynamic tool registration, making adding, removing, and managing tools easy. 
 Tools are public methods that can be invoked by the GPT model based on user input or system needs.
@@ -143,14 +145,16 @@ Tools are public methods that can be invoked by the GPT model based on user inpu
 
 You can register individual tools or entire classes of tools in your `GPTModel`. Below are examples of how to add various types of methods and properties as tools.
 
-#### Adding Specific Methods
+#### Adding Specific Tools and Properties
 
-To add specific public static or instance methods as tools, use the following syntax:
+To add specific public static/instance methods/properties as tools, use the following syntax:
 
 ```csharp
 var model = new GPTModel("gpt-4o", "YOUR-API-KEY") // Initializes the model
-    .AddTool(() => MyTools.GetTime)               // Adding all overloads of a static tool
-    .AddTool<InstanceToolCar>(tc => tc.TurnOn);   // Adding all overloads of an instance tool
+    .AddTool(() => MyTools.GetTime)                // Adding all overloads of a static tool
+    .AddTool<InstanceToolCar>(tc => tc.TurnOn)     // Adding all overloads of an instance tool (currently disabled)
+    .AddProperty(() => MyToolClass.MyProperty)     // Adding static Getter and Setter as a tool (if both are public)
+    .AddProperty<InstanceToolCar>(tc => tc.isOn);  // Adding static Getter and Setter as a tool (if both are public)
 ```
 
 #### Handling Methods with Multiple Overloads
@@ -158,23 +162,40 @@ var model = new GPTModel("gpt-4o", "YOUR-API-KEY") // Initializes the model
 If a method has multiple overloads, specify the desired method signature:
 
 ```csharp
-model.AddTool(() => new Func<int, bool, string>(MyTools.GetTime))      // Adding a specific overload
-    .AddTool<InstanceToolCar>(tc => new Func<double, int>(tc.FuelUp));   // Adding another overload
+model.AddTool(() => new Func<int, bool, string>(MyTools.GetTime))        // Adding a specific overload
+    .AddTool<InstanceToolCar>(tc => new Func<double, int>(tc.FuelUp));   // Adding another overload (currently disabled)
 ```
+
+#### Handling Properties in special Cases:
+
+```csharp
+model.AddProperty(() => MyToolClass.MyProperty, PropertyAccess.Getter);  // Only adds the Getter even if the Setter is also public
+
+[GPT_Data(PropertyAccess.Getter)]            // Only allows the Getter to be added, even tough the setter is also public
+public static int MyProperty { get; set; }
+```
+With the first option you can filter Getter and Setter locally for specific model instances
+With the section option you can prevent ANY model instance from accessing the Getter or Setter while still keeping it public for yourself
 
 ### Adding Tools from Entire Classes
 
 To add all tools from a class:
 
 ```csharp
-model.AddToolClass<MyToolClass>(); // Adds all tools from the specified class
+model.AddToolClass<MyToolClass>(); // Adds all static tools and properties from the specified class 
 ```
 
 To exclude specific methods, you can selectively remove them:
 
 ```csharp
-model.AddToolClass<MyToolClass>()                           // Adds all tools from the class
+model.AddToolClass<MyToolClass>()                           // Adds all static tools and properties from the class
     .RemoveTool<MyToolClass>(_ => MyToolClass.RemovedTool); // Removes specific tools
+```
+
+You can also add all public instance tools and properties or just ALL public tools and properties
+```csharp
+model.AddToolClass<MyToolClass>(MethodAccessType.InstanceOnly);                           
+model.AddToolClass<MyToolClass>(MethodAccessType.StaticAndInstance);                           
 ```
 
 ### Custom Attributes for Tools
@@ -187,215 +208,9 @@ Utilize custom attributes to add metadata or control the inclusion of tools. Bel
 - **`[GPT_Data]`**: Defines access for a property, specifying whether it’s read-only, write-only, or both.
 - **`[GPT_Locked]`**: Marks a method or class as locked, preventing it from being used by GPT.
 
-### Example of Tool Class with Attributes
-
-Refer to the following examples in 
-"OpenAI.ChatGPT.Net.IntegrationTests/Tools/" and
-"OpenAI.ChatGPT.Net.IntegrationTests/InstanceTools/"
-for detailed implementations:
-
-```csharp
-[GPT_Description("This class provides time-related utilities.")]
-public class MyTools
-{
-    /// <summary>
-    /// Example of a simple tool that returns the current time in a specific timezone.
-    /// </summary>
-    /// <param name="timeZoneOffset"></param>
-    /// <param name="use24h"></param>
-    /// <returns></returns>
-    public static string GetTime(int timeZoneOffset, bool use24h)
-    {
-        var time = DateTime.UtcNow.AddHours(timeZoneOffset);
-        return use24h ? time.ToString("HH:mm") : time.ToString("hh:mm tt");
-    }
-
-    [GPT_Locked]
-    public static void LockedMethod()
-    {
-        // Method implementation that should not be accessible by GPT
-    }
-}
-```
-
-Classes that have InstancTools need to inherit from `InstanceToolsManager<ClassName>(instanceName)` and parse a `instanceName` along
-They also need to implement an Empty constructor.
-See the implementation Example below:
-
-```csharp
-[GPT_Description("Instance of a Car")]
-public class CarInstance(string carName, int horsePower, string producer) : InstanceToolsManager<CarInstance>(carName)
-{
-    public int horsePower = horsePower;
-    public string producer = producer;
-    public int fuel = 0;
-    public bool isOn { get; set; } = false;
-
-    public CarInstance() : this("CarInstanceExample", 0, "ExampleProducer") { }
-
-    public CarInstance(int horsePower) : this("TestCar", horsePower, "TestProducer") { }
-
-    public int FuelUp(int fuelAmount)
-    {
-        return fuel += fuelAmount;
-    }
-
-    public int FuelUp(double fuelAmount)
-    {
-        return fuel += (int)fuelAmount;
-    }
-
-    public bool TurnOn(bool setOn)
-    {
-        return isOn = setOn;
-    }
-
-    public override string ToString()
-    {
-        return $"Car: {InstanceName}\nHorsePower: {horsePower}\nProducer: {producer}\nFuel: {fuel}";
-    }
-}
-```
-
-### Full Integration Example
-
-Below is a comprehensive example of how to register and manage tools, handle responses, and manage tool calls using `GPTModel`:
-
-```csharp
-public static async Task Run()
-{
-    GPTModel model = new("gpt-4o", APIKey.KEY)
-    {
-        ResponseHandler = JsonDebugHandlers.PrintResponseHandler,
-        PayloadHandler = JsonDebugHandlers.PrintPayloadHandler,
-        ToolCallHandler = new MyToolHandler(),
-        MaxTokens = 1000
-    };
-
-    // Register static tools
-    model.AddTool(() => MyTools.GetTime)
-         .AddTool(() => new Func<int, bool, string>(MyTools.GetTime))
-         .RemoveTool(() => MyTools.GetTime);
-
-    // Register properties as tools
-    model.AddProperty(() => MyToolClass.MyProperty)
-         .AddProperty(() => MyToolClass.MyProperty, PropertyAccess.Getter)
-         .RemoveProperty(() => MyToolClass.MyProperty);
-
-    // Register all tools from a class
-    model.AddToolClass<MyToolClass>()
-         .AddToolClass<MyToolClassWithAttributes>();
-
-    // Register instance tools and properties
-    model.AddTool<CarInstance>(ci => ci.TurnOn)
-         .AddProperty<CarInstance>(ci => ci.isOn);
-
-    // Allow GPT to create and destroy instances on it's own
-    model.AddConstructor<CarInstance>([typeof(string), typeof(int), typeof(string)])
-         .RemoveConstructor<CarInstance>()           // () means all overloads
-         .AddConstructor<CarInstance>([])            // ([]) means the constructor with no arguments
-         .AddDestructor<CarInstance>();
-
-    // Or create instances for GPT yourself
-    long ID = CarInstance.Construct(new CarInstance("R8", 1000, "Audi"));
-    CarInstance.Destruct(ID);
-
-    // Set up a custom tool call handler
-    model.SetToolCallHandler(new ToolCallHandlerWrapper
-    {
-        ToolCall = (toolName, toolParameters, toolCallIndex) =>
-        {
-            Console.WriteLine($"GPT wants to call {toolName} with parameters: {string.Join(", ", toolParameters)}");
-            return (true, "");
-        },
-        ToolResponse = (toolCallIndex, response) =>
-        {
-            Console.WriteLine($"Tool response for call #{toolCallIndex}: {response}");
-            return $"Tool response for call #{toolCallIndex}: {response}";
-        }
-    });
-
-    // Simple conversation code
-    Console.Write($"{ChatRole.User}: ");
-    var initialMessage = new ChatMessage(ChatRole.User, Console.ReadLine());
-    var messageHistory = new List<IMessage> { initialMessage };
-
-    while (true)
-    {
-        var response = await model.Complete(messageHistory);
-        var message = response as ChatMessage;
-        if (message != null)
-        {
-            Console.WriteLine($"{message.Role}: {message.Content}");
-            messageHistory.Add(message);
-        }
-        else
-        {
-            Console.WriteLine("Error processing response.");
-            messageHistory.RemoveAt(messageHistory.Count - 1);
-        }
-
-        Console.Write($"{ChatRole.User}: ");
-        var nextMessage = new ChatMessage(ChatRole.User, Console.ReadLine());
-        messageHistory.Add(nextMessage);
-    }
-}
-
-// Tool call handler implementation
-public class MyToolHandler : IToolCallHandler
-{
-    private readonly List<string> lockedTools = new();
-    private string lastToolName = "";
-    private object[]? lastToolParameters;
-    private readonly int maxToolCalls;
-    private int toolCallsCounter;
-
-    public MyToolHandler(int maxToolCalls = 0)
-    {
-        this.maxToolCalls = maxToolCalls;
-    }
-
-    public List<Tool> OnGetAvailableTools(List<Tool> registeredTools)
-    {
-        return maxToolCalls != 0 && toolCallsCounter >= maxToolCalls
-            ? new List<Tool>()
-            : registeredTools.Where(t => !lockedTools.Contains(t.Function.Name)).ToList();
-    }
-
-    public bool OnToolCall(string toolName, object[]? toolParameters, int toolCallIndex, out string? denialReason)
-    {
-        if (maxToolCalls != 0 && toolCallsCounter >= maxToolCalls)
-        {
-            denialReason = "Max tool calls reached.";
-            return false;
-        }
-
-        Console.WriteLine($"GPT wants to call {toolName} with parameters: {string.Join(", ", toolParameters ?? Array.Empty<object>())}");
-        var input = Console.ReadLine();
-        toolCallsCounter++;
-        lockedTools.Add(toolName);
-        denialReason = input?.Split(' ', 2).ElementAtOrDefault(1);
-        return input?.StartsWith("y") ?? false;
-    }
-
-    public string OnToolResponse(int toolCallIndex, string response)
-    {
-        Console.WriteLine($"Tool response for call #{toolCallIndex}: {response}");
-        return response;
-    }
-
-    public void OnCompletion()
-    {
-        toolCallsCounter = 0;
-        lockedTools.Clear();
-        Console.WriteLine("Tool calling session completed.");
-    }
-}
-```
-
 ## Contributing
 
-We welcome contributions! Here’s how you can get involved:
+I welcome contributions! Here’s how you can get involved:
 
 1. Fork the repository.
 2. Create a feature branch (`git checkout -b feature-branch`).
@@ -403,7 +218,8 @@ We welcome contributions! Here’s how you can get involved:
 4. Push to the branch (`git push origin feature-branch`).
 5. Create a new Pull Request.
 
-Please ensure your code is well-tested and follows the existing coding style.
+Please ensure your code is tested and follows the existing coding style. 
+(about what existing code style am I even talking xD)
 
 ## License
 
