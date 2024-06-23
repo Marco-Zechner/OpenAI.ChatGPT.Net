@@ -1,4 +1,4 @@
-﻿namespace OpenAI.ChatGPT.Net.Enums
+﻿namespace OpenAI.ChatGPT.Net.Tools
 {
     public enum MethodAccessType
     {

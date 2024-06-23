@@ -1,4 +1,6 @@
-﻿namespace OpenAI.ChatGPT.Net
+﻿using System.Reflection;
+
+namespace OpenAI.ChatGPT.Net
 {
     public class GPTToolLogicHelpers
     {
@@ -26,7 +28,7 @@
                 return "number";
             if (type == typeof(bool))
                 return "boolean";
-            if (type == typeof(string) || type.IsEnum)
+            if (type == typeof(string))
                 return "string";
             //if (type.IsArray || type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
             //    return "array";
@@ -37,7 +39,71 @@
             throw new NotSupportedException($"Type '{type}' is not supported for tool parameters.");
         }
 
-        public static bool IsDefaultJsonType(Type type) 
-            => (type == typeof(int) || type == typeof(float) || type == typeof(bool) || type == typeof(string));
+        public static string GenerateSimplifiedTypeString(IEnumerable<Type> types)
+        {
+            string typeInfo = "";
+            foreach (var type in types)
+            {
+                _ = true switch
+                {
+                    bool _ when type == typeof(int) => typeInfo += "In",
+                    bool _ when type == typeof(long) => typeInfo += "Lo",
+                    bool _ when type == typeof(short) => typeInfo += "So",
+                    bool _ when type == typeof(byte) => typeInfo += "By",
+                    bool _ when type == typeof(float) => typeInfo += "Fo",
+                    bool _ when type == typeof(double) => typeInfo += "Do",
+                    bool _ when type == typeof(decimal) => typeInfo += "De",
+                    bool _ when type == typeof(bool) => typeInfo += "Bo",
+                    bool _ when type == typeof(string) => typeInfo += "St",
+                    _ => throw new NotSupportedException($"Type '{type}' is not supported for tool parameters.")
+                };
+            }
+            return typeInfo;
+        }
+
+        public static List<Type> GenerateTypesFromSimplifiedTypeString(string simplifiedTypeString)
+        {
+            List<Type> types = [];
+            while(simplifiedTypeString.Length >= 2)
+            {
+                string nextPart = simplifiedTypeString[..2];
+                simplifiedTypeString = simplifiedTypeString[2..];
+
+                Type foundType = nextPart switch
+                {
+                    "In" => typeof(int),
+                    "Lo" => typeof(long),
+                    "So" => typeof(short),
+                    "By" => typeof(byte),
+                    "Fo" => typeof(float),
+                    "Do" => typeof(double),
+                    "De" => typeof(decimal),
+                    "Bo" => typeof(bool),
+                    "St" => typeof(string),
+                    _ => throw new NotSupportedException($"Couldn't convert {nextPart} into a valid Type")
+                };
+                types.Add(foundType);
+            }
+            return types;
+        }
+
+        public static Type ToDefaultType(Type type)
+        {
+            if (type == typeof(int) || type == typeof(long) || type == typeof(short) || type == typeof(byte))
+                return typeof(int);
+            if (type == typeof(float) || type == typeof(double) || type == typeof(decimal))
+                return typeof(float);
+            if (type == typeof(bool))
+                return typeof(bool);
+            if (type == typeof(string))
+                return typeof(string);
+
+            // For unsupported types, throw an exception
+            throw new NotSupportedException($"Type '{type}' is not supported for tool parameters.");
+        }
+
+
+        public static bool IsDefaultMethod(string methodName) 
+            => new HashSet<string>() { "GetHashCode", "Equals", "GetType", "ToString" }.Contains(methodName);
     }
 }

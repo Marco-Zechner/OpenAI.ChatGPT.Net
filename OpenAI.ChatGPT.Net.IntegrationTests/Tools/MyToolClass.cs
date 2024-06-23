@@ -1,4 +1,4 @@
-﻿using OpenAI.ChatGPT.Net.Attributes;
+﻿using OpenAI.ChatGPT.Net.Tools;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
 {
@@ -8,7 +8,15 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
     public class MyToolClass
     {
         public static int MyField;
+        [GPT_Data]
         public static int MyProperty { get; set; }
+        
+        [GPT_Data]
+        public static int MyProperty2 { get; private set; }
+
+        [GPT_Data(PropertyAccess.Getter)]
+        public static int MyProperty3 { get; set; }
+
 
         public static string Tool1() => "Tool1";
        

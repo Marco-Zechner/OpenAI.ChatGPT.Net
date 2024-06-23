@@ -1,5 +1,5 @@
 ﻿using OpenAI.ChatGPT.Net.DataModels;
-using OpenAI.ChatGPT.Net.Enums;
+using OpenAI.ChatGPT.Net.Tools;
 using OpenAI.ChatGPT.Net.Exeptions;
 using OpenAI.ChatGPT.Net.IntegrationTests.Handlers;
 using OpenAI.ChatGPT.Net.Interfaces;
@@ -30,7 +30,7 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests
 
             while (true)
             {
-                ChatResponse response = await model.Complete(messageHistory);
+                ChatResponse response = await model.CompletionAsync(messageHistory);
                 ChatMessage message;
                 try {
                     message = (ChatMessage)response; // This will throw an exception if the response is an error

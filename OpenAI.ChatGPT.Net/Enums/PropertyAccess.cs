@@ -1,9 +1,9 @@
-﻿namespace OpenAI.ChatGPT.Net.Enums
+﻿namespace OpenAI.ChatGPT.Net.Tools
 {
     public enum PropertyAccess
     {
-        Getter,
-        Setter,
-        Both
+        Getter = 1,
+        Setter = 2,
+        Both = Getter | Setter
     }
 }

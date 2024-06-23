@@ -1,4 +1,4 @@
-﻿using OpenAI.ChatGPT.Net.Enums;
+﻿using OpenAI.ChatGPT.Net.Tools;
 
 namespace OpenAI.ChatGPT.Net.Interfaces
 {

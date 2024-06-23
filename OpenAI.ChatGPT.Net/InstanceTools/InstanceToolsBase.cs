@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using OpenAI.ChatGPT.Net.Attributes;
+using OpenAI.ChatGPT.Net.Tools;
 using System.Collections.Concurrent;
 
 namespace OpenAI.ChatGPT.Net.InstanceTools

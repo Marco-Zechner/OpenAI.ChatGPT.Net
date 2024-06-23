@@ -1,4 +1,4 @@
-﻿using OpenAI.ChatGPT.Net.Attributes;
+﻿using OpenAI.ChatGPT.Net.Tools;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
 {
@@ -15,7 +15,7 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests.Tools
         public static void NonToolMethods3() { }
     }
 
-    internal class AllLockedMethods
+    internal class AllLockedClass
     {
         [GPT_Locked]
         public static void NonToolMethods1() { }

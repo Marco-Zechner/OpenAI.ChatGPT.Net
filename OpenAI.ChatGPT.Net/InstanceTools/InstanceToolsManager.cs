@@ -1,4 +1,4 @@
-﻿using OpenAI.ChatGPT.Net.Attributes;
+﻿using OpenAI.ChatGPT.Net.Tools;
 using OpenAI.ChatGPT.Net.DataModels;
 using System.Reflection;
 
@@ -26,10 +26,10 @@ namespace OpenAI.ChatGPT.Net.InstanceTools
             if (InstanceMethodsInitComplete)
                 return;
 
-            var methodNames = managerType.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            var methods = managerType.GetMethods(BindingFlags.Public | BindingFlags.Static)
                       .Where(m => m.GetCustomAttributes(typeof(GPT_Tool), false).Length != 0);
 
-            foreach (var method in methodNames)
+            foreach (var method in methods)
             {
                 var methodName = method.Name;
                 if (tools != null)
@@ -102,27 +102,23 @@ namespace OpenAI.ChatGPT.Net.InstanceTools
         private static ToolParameters CreateToolParametersWithInstanceClassName(MethodInfo methodInfo)
         {
             var gptParametersAttribute = methodInfo.GetCustomAttribute<GPT_Parameters>();
-
             var parameterDescriptions = gptParametersAttribute?.DescriptionsForAPI;
+            var parameterInfos = methodInfo.GetParameters();
 
-            ParameterInfo[] parameterInfos = methodInfo.GetParameters();
-            Dictionary<string, ParameterDetail> properties = [];
-            List<string> required = [];
-
-            properties.Add(INSTANCE_CLASS_NAME, new ParameterDetail("string", "The class name of the instance", []));
-            required.Add(INSTANCE_CLASS_NAME);
+            var properties = new Dictionary<string, ParameterDetail>
+            {
+                { INSTANCE_CLASS_NAME, new ParameterDetail("string", "The class name of the instance", []) }
+            };
+            var required = new List<string> { INSTANCE_CLASS_NAME };
 
             for (int i = 0; i < parameterInfos.Length; i++)
             {
-                ParameterInfo paramInfo = parameterInfos[i];
-                string paramName = paramInfo.Name ?? $"param{i}";
-                string paramType = GPTToolLogicHelpers.ConvertToValidJsonType(paramInfo.ParameterType);
-                string paramDescription = parameterDescriptions != null && i < parameterDescriptions.Length
-                ? parameterDescriptions[i]
-                : string.Empty;
+                var paramInfo = parameterInfos[i];
+                var paramName = paramInfo.Name ?? $"param{i}";
+                var paramType = GPTToolLogicHelpers.ConvertToValidJsonType(paramInfo.ParameterType);
+                var paramDescription = parameterDescriptions != null && i < parameterDescriptions.Length ? parameterDescriptions[i] : string.Empty;
 
                 properties.Add(paramName, new ParameterDetail(paramType, paramDescription, []));
-
                 if (!paramInfo.IsOptional)
                     required.Add(paramName);
             }

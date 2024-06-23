@@ -1,4 +1,4 @@
-﻿using OpenAI.ChatGPT.Net.Attributes;
+﻿using OpenAI.ChatGPT.Net.Tools;
 using OpenAI.ChatGPT.Net.InstanceTools;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests.InstanceTools

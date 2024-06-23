@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using OpenAI.ChatGPT.Net.Enums;
+using OpenAI.ChatGPT.Net.Tools;
 using OpenAI.ChatGPT.Net.Interfaces;
 
 namespace OpenAI.ChatGPT.Net.DataModels

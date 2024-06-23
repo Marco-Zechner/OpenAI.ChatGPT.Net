@@ -1,7 +1,7 @@
 ﻿using OpenAI.ChatGPT.Net.DataModels;
-using OpenAI.ChatGPT.Net.Enums;
+using OpenAI.ChatGPT.Net.Tools;
 using OpenAI.ChatGPT.Net.Exeptions;
-using OpenAI.ChatGPT.Net.InstanceTools;
+
 using OpenAI.ChatGPT.Net.IntegrationTests.Handlers;
 using OpenAI.ChatGPT.Net.IntegrationTests.InstanceTools;
 using OpenAI.ChatGPT.Net.IntegrationTests.Tools;
@@ -9,7 +9,7 @@ using OpenAI.ChatGPT.Net.Interfaces;
 
 namespace OpenAI.ChatGPT.Net.IntegrationTests
 {
-    internal class AddTools
+    public class AddTools
     {
         public static async Task Run()
         {
@@ -52,7 +52,7 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests
             List<IMessage> messageHistory = [initialMessage];
             while (true)
             {
-                ChatResponse response = await model.Complete(messageHistory);
+                ChatResponse response = await model.CompletionAsync(messageHistory);
                 ChatMessage message;
                 try
                 {
@@ -92,44 +92,62 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests
 
 
 
-            // Adding a public static properties GETTER and SETTER as a Tool.
-            model.AddProperty(() => MyToolClass.MyProperty)
+            // Adding a public static properties GETTER and SETTER as a Tool if possible.
+            model.AddProperty(() => MyToolClass.MyProperty);
             /* NOTE:
             Please keep in mind that the getter or setter must be public to be added.
             If only the getter is public, then only the getter will be added.
+            
+            You can also have both public but only provide one by specifying the PropertyAccess above the property
+                Example1:
+                [GPT_Data(PropertyAccess.Getter)]
+                public static string MyProperty { get; set; }
+
+                Example2:
+                [GPT_Data] // in this case only required if the class has [GPT_Locked]
+                public static string MyProperty { get; private set; }
+            From the API point of view these 2 are the same.
              */
 
+
+
             // You can also filter to only use the GETTER or SETTER of a property
-            .AddProperty(() => MyToolClass.MyProperty, PropertyAccess.Getter);
+            model.AddProperty(() => MyToolClass.MyProperty2, PropertyAccess.Getter);
             /* NOTE:
             Trying to add a the Getter specifically while it is private will throw an error.
              */
 
-            //Same rules for removing properties
-            model.RemoveProperty(() => MyToolClass.MyProperty)
-            .RemoveProperty(() => MyToolClass.MyProperty, PropertyAccess.Getter);
+            // Removing a specific property
+            model.RemoveProperty(() => MyToolClass.MyProperty);
+            model.RemoveProperty(() => MyToolClass.MyProperty2, PropertyAccess.Getter);
+
 
             // Adding all
             // - public static methods
             // - GETTER/SETTER from static properties
             // of a class as Tools. Excludes methods & properties with the [GPT_Locked] attribute
-            model.AddToolClass<MyToolClass>()
+            model.AddToolClass<MyToolClass>();
+            model.AddToolClass<MyTools>()
 
             // This class has the [GPT_Locked] attribute
             // Only methods with the [GPT_Tool] attribute will be added
             .AddToolClass<MyToolClassWithAttributes>();
             // Filter tools out again.
-            model.RemoveTool(() => MyToolClassWithAttributes.Tool2);
+            model.RemoveTool(() => MyToolClass.RemovedTool);
 
             //--!!-- INVALID USAGE --!!--\\
             // Trying to Add a Method with the [GPT_Locked] attribute will throw an Error
-            //model.AddTool(() => MyToolClass.LockedMethod)
+            //model.AddTool(() => MyToolClass.LockedMethod);
             // Trying to Add a Class with the [GPT_Locked] attribute, where no methods have the [GPT_Tool] attribute will throw an Error
-            //.AddToolClass<LockedClass>()
+            //model.AddToolClass<LockedClass>();
             // Trying to Add a Class where all methods have the [GPT_Locked] attribute will throw an Error
-            //.AddToolClass<AllLockedMethods>()
+            //model.AddToolClass<AllLockedClass>();
             // Trying to Add a Field as a Property will throw an Error
-            //.AddProperty(() => MyToolClass.MyField);
+            //model.AddProperty(() => MyToolClass.MyField);
+            // Trying to Add the Setter of a Property will throw an Error if it is private
+            //model.AddProperty(() => MyToolClass.MyProperty2, PropertyAccess.Setter);
+            // Trying to Add the Setter of a Property will throw an Error if the [GPT_Data] attribute is configured to only provide the Getter
+            //model.AddProperty(() => MyToolClass.MyProperty3, PropertyAccess.Setter);
         }
 
         public static void AddInstanceTools(ref GPTModel model)

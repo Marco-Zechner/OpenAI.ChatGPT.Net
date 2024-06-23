@@ -10,8 +10,9 @@ namespace OpenAI.ChatGPT.Net.DataModels
         // scale_tier? Can't find info about it: https://platform.openai.com/docs/api-reference/chat/object
         [property: JsonProperty("system_fingerprint")] string SystemFingerprint,
         [property: JsonProperty("object")] string Object, // always = chat.completion
-        [property: JsonProperty("usage")] TokenUsage Usage,
-        [property: JsonProperty("error")] ChatError? Error
+        [property: JsonProperty("usage")] TokenUsage? Usage,
+        [property: JsonProperty("error")] ChatError? Error,
+        [property: JsonIgnore] DateTime? Timestamp
     );
 
     // technically I can also just use ChatResponse

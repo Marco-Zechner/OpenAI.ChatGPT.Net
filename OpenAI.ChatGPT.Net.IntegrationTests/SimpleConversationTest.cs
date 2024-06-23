@@ -1,5 +1,5 @@
 ﻿using OpenAI.ChatGPT.Net.DataModels;
-using OpenAI.ChatGPT.Net.Enums;
+using OpenAI.ChatGPT.Net.Tools;
 using OpenAI.ChatGPT.Net.Exeptions;
 using OpenAI.ChatGPT.Net.Interfaces;
 
@@ -19,7 +19,7 @@ namespace OpenAI.ChatGPT.Net.IntegrationTests
             {
                 while (true)
                 {
-                    ChatResponse response = await model.Complete(messageHistory);
+                    ChatResponse response = await model.CompletionAsync(messageHistory);
 
                     ChatMessage message = (ChatMessage)response;
                     Console.WriteLine(message);
