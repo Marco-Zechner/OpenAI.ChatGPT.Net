@@ -1,11 +1,8 @@
 
 # OpenAI.ChatGPT.Net - .NET 8.0 Library for ChatGPT
 
-```
-Placeholder
-[![NuGet Package](https://img.shields.io/nuget/v/OpenAI.ChatGPT.Net?logo=NuGet&color=004880&label=NuGet)](https://www.nuget.org/packages/OpenAI.ChatGPT.Net)
-[![NuGet Package](https://img.shields.io/nuget/dt/OpenAI.ChatGPT.Net?color=%23004880&label=Downloads&logo=NuGet)](https://www.nuget.org/packages/OpenAI.ChatGPT.Net)
-```
+[![NuGet Package](https://img.shields.io/nuget/v/mz.ChatGPT.Net?logo=NuGet&color=004880&label=NuGet)](https://www.nuget.org/packages/mz.ChatGPT.Net)
+[![NuGet Package](https://img.shields.io/nuget/dt/mz.ChatGPT.Net?color=%23004880&label=Downloads&logo=NuGet)](https://www.nuget.org/packages/mz.ChatGPT.Net)
 [![GitHub issues](https://img.shields.io/github/issues/Marco-Zechner/OpenAI.ChatGPT.Net?label=Issues&logo=GitHub)](https://github.com/Marco-Zechner/OpenAI.ChatGPT.Net/issues)
 [![GitHub forks](https://img.shields.io/github/forks/Marco-Zechner/OpenAI.ChatGPT.Net?label=Forks&logo=GitHub)](https://github.com/Marco-Zechner/OpenAI.ChatGPT.Net/network)
 [![GitHub stars](https://img.shields.io/github/stars/Marco-Zechner/OpenAI.ChatGPT.Net?label=Stars&logo=GitHub)](https://github.com/Marco-Zechner/OpenAI.ChatGPT.Net/stargazers)
