@@ -39,13 +39,13 @@ OpenAI.ChatGPT.Net is a C# library built on .NET 8.0 that provides an easy-to-us
 Install the library via NuGet:
 
 ```bash
-NOT READY!!! Install-Package OpenAI.ChatGPT.Net
+Install-Package mz.ChatGPT.Net -Version 0.1.0
 ```
 
 Or using .NET CLI:
 
 ```bash
-NOT READY!!! dotnet add package OpenAI.ChatGPT.Net
+dotnet add package mz.ChatGPT.Net --version 0.1.0
 ```
 
 ### Basic Usage
